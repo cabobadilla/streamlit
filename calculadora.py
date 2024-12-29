@@ -1,26 +1,39 @@
 import streamlit as st
 
 # Configuración de la página
-st.set_page_config(page_title="Calculadora", page_icon="⚙", layout="centered")
+st.set_page_config(page_title="Calculadora Avanzada", page_icon="⚙", layout="centered")
 
-# Estilo para aplicar el color rojo
+# Estilo para aplicar los colores rojo y azul
 st.markdown(
     """
     <style>
     .stApp {
-        background-color: #ffe6e6;
+        background-color: #e6f2ff;
     }
     h1 {
-        color: #b30000;
+        color: #004080;
     }
-    .stButton > button {
+    .screen {
+        background-color: #ffffff;
+        border: 2px solid #004080;
+        border-radius: 5px;
+        padding: 10px;
+        text-align: right;
+        font-size: 2em;
+        color: #004080;
+    }
+    .button {
         background-color: #ff4d4d;
-        color: white;
         border: none;
-    }
-    .stButton > button:hover {
-        background-color: #ff0000;
+        border-radius: 5px;
         color: white;
+        font-size: 1.5em;
+        padding: 10px;
+        margin: 5px;
+        width: 60px;
+    }
+    .button:hover {
+        background-color: #ff0000;
     }
     </style>
     """,
@@ -28,30 +41,37 @@ st.markdown(
 )
 
 # Título
-st.title("Calculadora Roja")
+st.title("Calculadora Roja y Azul")
 
-# Entrada de números
-st.write("Ingresa dos números para realizar una operación:")
-num1 = st.number_input("Número 1", value=0.0, step=0.1)
-num2 = st.number_input("Número 2", value=0.0, step=0.1)
+# Variables para la calculadora
+if 'input_value' not in st.session_state:
+    st.session_state.input_value = ""
 
-# Selección de operación
-operation = st.selectbox("Selecciona una operación:", ["Suma", "Resta", "Multiplicación", "División"])
+# Función para manejar la entrada
+def button_click(value):
+    if value == "C":
+        st.session_state.input_value = ""
+    elif value == "=":
+        try:
+            st.session_state.input_value = str(eval(st.session_state.input_value))
+        except Exception:
+            st.session_state.input_value = "Error"
+    else:
+        st.session_state.input_value += value
 
-# Botón para calcular
-if st.button("Calcular"):
-    if operation == "Suma":
-        result = num1 + num2
-        st.success(f"El resultado de la suma es: {result}")
-    elif operation == "Resta":
-        result = num1 - num2
-        st.success(f"El resultado de la resta es: {result}")
-    elif operation == "Multiplicación":
-        result = num1 * num2
-        st.success(f"El resultado de la multiplicación es: {result}")
-    elif operation == "División":
-        if num2 != 0:
-            result = num1 / num2
-            st.success(f"El resultado de la división es: {result}")
-        else:
-            st.error("Error: No se puede dividir entre cero.")
+# Pantalla
+st.markdown(f"<div class='screen'>{st.session_state.input_value}</div>", unsafe_allow_html=True)
+
+# Botones
+cols = st.columns(4)
+buttons = [
+    ("7", cols[0]), ("8", cols[1]), ("9", cols[2]), ("/", cols[3]),
+    ("4", cols[0]), ("5", cols[1]), ("6", cols[2]), ("*", cols[3]),
+    ("1", cols[0]), ("2", cols[1]), ("3", cols[2]), ("-", cols[3]),
+    ("0", cols[0]), ("C", cols[1]), ("=", cols[2]), ("+", cols[3])
+]
+
+for (label, col) in buttons:
+    with col:
+        if st.button(label, key=label, help=f"Botón {label}", kwargs={"className": "button"}):
+            button_click(label)
