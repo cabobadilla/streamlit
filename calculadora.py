@@ -1,77 +1,91 @@
 import streamlit as st
+import math
 
-# Configuración de la página
-st.set_page_config(page_title="Calculadora Avanzada", page_icon="⚙", layout="centered")
+def main():
+    st.set_page_config(page_title="Calculadora estilo Mac", layout="centered")
+    
+    # Estilos CSS para diseño en blanco y negro
+    st.markdown(
+        """
+        <style>
+        body {
+            background-color: black;
+            color: white;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .calculator {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+        .calculator button {
+            background-color: white;
+            color: black;
+            border: none;
+            font-size: 18px;
+            font-weight: bold;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .calculator button:hover {
+            background-color: #e6e6e6;
+        }
+        .display {
+            grid-column: span 4;
+            background-color: white;
+            color: black;
+            font-size: 24px;
+            padding: 15px;
+            text-align: right;
+            border-radius: 5px;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
 
-# Estilo para aplicar los colores rojo y azul
-st.markdown(
-    """
-    <style>
-    .stApp {
-        background-color: #e6f2ff;
-    }
-    h1 {
-        color: #004080;
-    }
-    .screen {
-        background-color: #ffffff;
-        border: 2px solid #004080;
-        border-radius: 5px;
-        padding: 10px;
-        text-align: right;
-        font-size: 2em;
-        color: #004080;
-    }
-    .button {
-        background-color: #ff4d4d;
-        border: none;
-        border-radius: 5px;
-        color: white;
-        font-size: 1.5em;
-        padding: 10px;
-        margin: 5px;
-        width: 60px;
-    }
-    .button:hover {
-        background-color: #ff0000;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+    st.markdown("<div class='calculator'>", unsafe_allow_html=True)
 
-# Título
-st.title("Calculadora Roja y Azul")
+    # Display de la calculadora
+    if 'input_text' not in st.session_state:
+        st.session_state.input_text = ""
 
-# Variables para la calculadora
-if 'input_value' not in st.session_state:
-    st.session_state.input_value = ""
+    display_text = st.session_state.input_text
 
-# Función para manejar la entrada
-def button_click(value):
-    if value == "C":
-        st.session_state.input_value = ""
-    elif value == "=":
-        try:
-            st.session_state.input_value = str(eval(st.session_state.input_value))
-        except Exception:
-            st.session_state.input_value = "Error"
-    else:
-        st.session_state.input_value += value
+    st.markdown(f"<div class='display'>{display_text}</div>", unsafe_allow_html=True)
 
-# Pantalla
-st.markdown(f"<div class='screen'>{st.session_state.input_value}</div>", unsafe_allow_html=True)
+    # Botones de la calculadora
+    buttons = [
+        "7", "8", "9", "/",
+        "4", "5", "6", "*",
+        "1", "2", "3", "-",
+        "0", ".", "=", "+",
+    ]
 
-# Botones
-cols = st.columns(4)
-buttons = [
-    ("7", cols[0]), ("8", cols[1]), ("9", cols[2]), ("/", cols[3]),
-    ("4", cols[0]), ("5", cols[1]), ("6", cols[2]), ("*", cols[3]),
-    ("1", cols[0]), ("2", cols[1]), ("3", cols[2]), ("-", cols[3]),
-    ("0", cols[0]), ("C", cols[1]), ("=", cols[2]), ("+", cols[3])
-]
+    col1, col2, col3, col4 = st.columns(4)
 
-for (label, col) in buttons:
-    with col:
-        if st.button(label, key=label, help=f"Botón {label}", kwargs={"className": "button"}):
-            button_click(label)
+    def on_click(label):
+        if label == "=":
+            try:
+                # Evalúa la expresión
+                st.session_state.input_text = str(eval(st.session_state.input_text))
+            except Exception:
+                st.session_state.input_text = "Error"
+        elif label == "C":
+            # Reinicia la entrada
+            st.session_state.input_text = ""
+        else:
+            # Actualiza la entrada
+            st.session_state.input_text += label
+
+    for i, label in enumerate(buttons):
+        with [col1, col2, col3, col4][i % 4]:
+            st.button(label, key=label, on_click=lambda l=label: on_click(l))
+
+    st.markdown("</div>", unsafe_allow_html=True)
+
+if __name__ == "__main__":
+    main()
